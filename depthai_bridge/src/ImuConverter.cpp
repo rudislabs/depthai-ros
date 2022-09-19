@@ -5,11 +5,15 @@ namespace dai {
 
 namespace ros {
 
-ImuConverter::ImuConverter(const std::string& frameName, ImuSyncMethod syncMode, double linear_accel_cov, double angular_velocity_cov)
+ImuConverter::ImuConverter(const std::string& frameName, ImuSyncMethod syncMode, double linear_accel_cov, double angular_velocity_cov, double imuOrientationQx, double imuOrientationQy, double imuOrientationQz, double imuOrientationQw)
     : _frameName(frameName),
       _syncMode(syncMode),
       _linear_accel_cov(linear_accel_cov),
       _angular_velocity_cov(angular_velocity_cov),
+      _imuOrientationQx(imuOrientationQx),
+      _imuOrientationQy(imuOrientationQy),
+      _imuOrientationQz(imuOrientationQz),
+      _imuOrientationQw(imuOrientationQw),
       _sequenceNum(0),
       _steadyBaseTime(std::chrono::steady_clock::now()) {
 #ifdef IS_ROS2
@@ -185,10 +189,10 @@ ImuMsgs::Imu ImuConverter::CreateUnitMessage(dai::IMUReportAccelerometer accel, 
     interpMsg.angular_velocity.y = gyro.y;
     interpMsg.angular_velocity.z = gyro.z;
 
-    interpMsg.orientation.x = 0.0;
-    interpMsg.orientation.y = 0.0;
-    interpMsg.orientation.z = 0.0;
-    interpMsg.orientation.w = 1.0;
+    interpMsg.orientation.x = _imuOrientationQx;
+    interpMsg.orientation.y = _imuOrientationQy;
+    interpMsg.orientation.z = _imuOrientationQz;
+    interpMsg.orientation.w = _imuOrientationQw;
 
     interpMsg.orientation_covariance = {-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     interpMsg.linear_acceleration_covariance = {_linear_accel_cov, 0.0, 0.0, 0.0, _linear_accel_cov, 0.0, 0.0, 0.0, _linear_accel_cov};

@@ -3,24 +3,56 @@
 
 <xacro:macro name="depthai_camera" params="camera_name camera_model parent base_frame 
                                            cam_pos_x cam_pos_y cam_pos_z 
-                                           cam_roll cam_pitch cam_yaw
+                                           cam_roll cam_pitch cam_yaw 
                                            r:=0.8 g:=0.8 b:=0.8 a:=0.8">
 
     <xacro:property name="M_PI"     value="3.1415926535897931" />
     <xacro:property name="model"    value="${camera_model}" />
     <xacro:property name="has_imu" value="false" />
-
-    <!-- <xacro:if value="${model == 'BW1098OAK'}">
-    </xacro:if> -->
-
     <xacro:property name="baseline" value="0.075" />
-    <xacro:if value="${model == 'OAK-D'}">
+
+<!-- Values for BMI270 sensor the assumed non-default config requiring name specification. -->    
+    <xacro:if value="${camera_model == 'OAK-D-BMI270'}">
+      <xacro:property name="model"    value="OAK-D" />
       <xacro:property name="has_imu" value="true" />
-      <xacro:property name="imu_offset_x" value="0.0" />
+      <xacro:property name="imu_offset_x" value="-0.0016" />
+      <xacro:property name="imu_offset_y" value="-0.0318" />
+      <xacro:property name="imu_offset_z" value="-0.0023" />
+      <xacro:property name="imu_r" value="${M_PI/2}" />
+      <xacro:property name="imu_p" value="${M_PI/2}" />
+      <xacro:property name="imu_y" value="-${M_PI/2}" />
+    </xacro:if>
+
+    <xacro:if value="${camera_model == 'OAK-D-PRO-BMI270'}">
+      <xacro:property name="model"    value="OAK-D-PRO" />
+      <xacro:property name="has_imu" value="true" />
+      <xacro:property name="imu_offset_x" value="-0.0016" />
+      <xacro:property name="imu_offset_y" value="-0.0318" />
+      <xacro:property name="imu_offset_z" value="-0.0023" />
+      <xacro:property name="imu_r" value="${M_PI/2}" />
+      <xacro:property name="imu_p" value="${M_PI/2}" />
+      <xacro:property name="imu_y" value="-${M_PI/2}" />
+    </xacro:if>
+
+<!-- Values for BNO08x sensor the assumed default config. -->
+    <xacro:if value="${camera_model == 'OAK-D'}">
+      <xacro:property name="has_imu" value="true" />
+      <xacro:property name="imu_offset_x" value="-0.0016" />
       <xacro:property name="imu_offset_y" value="-0.015" />
       <xacro:property name="imu_offset_z" value="-0.013662" />
       <xacro:property name="imu_r" value="0" />
-      <xacro:property name="imu_p" value="1.5708" />
+      <xacro:property name="imu_p" value="${M_PI/2}" />
+      <xacro:property name="imu_y" value="0" />
+    </xacro:if>
+
+
+    <xacro:if value="${camera_model == 'OAK-D-PRO'}">
+      <xacro:property name="has_imu" value="true" />
+      <xacro:property name="imu_offset_x" value="-0.0016" />
+      <xacro:property name="imu_offset_y" value="-0.015" />
+      <xacro:property name="imu_offset_z" value="-0.013662" />
+      <xacro:property name="imu_r" value="0" />
+      <xacro:property name="imu_p" value="${M_PI/2}" /> 
       <xacro:property name="imu_y" value="0" />
     </xacro:if>
 

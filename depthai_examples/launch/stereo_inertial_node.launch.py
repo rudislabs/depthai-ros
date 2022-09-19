@@ -9,6 +9,10 @@ from launch.conditions import IfCondition, LaunchConfigurationEquals, LaunchConf
 import launch_ros.actions
 import launch_ros.descriptions
 
+def ConvertStrFloatList(str_list):
+    floatList=[float(fval) for fval in list(filter(None, str_list.replace('[','').replace(']', \
+        '').replace('(','').replace(')','').replace('[','').replace(' ',',').split(',')))]
+    return floatList
 
 def generate_launch_description():
     depthai_examples_path = get_package_share_directory('depthai_examples')
@@ -29,8 +33,8 @@ def generate_launch_description():
     camera_model = LaunchConfiguration('camera_model',  default = 'OAK-D')
     tf_prefix    = LaunchConfiguration('tf_prefix',     default = 'oak')
     mode         = LaunchConfiguration('mode', default = 'depth')
-    base_frame   = LaunchConfiguration('base_frame',    default = 'oak-d_frame')
-    parent_frame = LaunchConfiguration('parent_frame',  default = 'oak-d-base-frame')
+    base_frame   = LaunchConfiguration('base_frame',    default = 'oak_d_frame')
+    parent_frame = LaunchConfiguration('parent_frame',  default = 'oak_d_base_frame')
     imuMode      = LaunchConfiguration('imuMode', default = '1')
 
     cam_pos_x    = LaunchConfiguration('cam_pos_x',     default = '0.0')
@@ -64,7 +68,7 @@ def generate_launch_description():
     previewWidth            = LaunchConfiguration('previewWidth',   default = 416)
     previewHeight           = LaunchConfiguration('previewHeight',  default = 416)
     
-    
+    imuOrientation        = LaunchConfiguration('imuOrientation', default = '0.0, 0.0, 0.0, 1.0')
     angularVelCovariance  = LaunchConfiguration('angularVelCovariance', default = 0.0)
     linearAccelCovariance = LaunchConfiguration('linearAccelCovariance', default = 0.0)
 
@@ -246,6 +250,11 @@ def generate_launch_description():
         default_value=previewHeight,
         description='Set the height of the preview window used for the NN detection.')
 
+    declare_imuOrientation_cmd = DeclareLaunchArgument(
+        'angularVelCovariance',
+        default_value=imuOrientation,
+        description='Set the orientation of the IMU in RPY or XYZW.')
+
     declare_angularVelCovariance_cmd = DeclareLaunchArgument(
         'angularVelCovariance',
         default_value=angularVelCovariance,
@@ -281,6 +290,22 @@ def generate_launch_description():
         default_value=enableRviz,
         description='When True create a RVIZ window.')
 
+    imuOrientationFloatList=ConvertStrFloatList(imuOrientation)
+
+    if len(imuOrientationFloatList) == 3:
+        try:
+            from tf_transformations import quaternion_from_euler as QfE
+            imuOrientationQuaternion = QfE(imuOrientationFloatList)
+        except:
+            try:
+                from tf.transformations import quaternion_from_euler as QfE
+                imuOrientationQuaternion = QfE(imuOrientationFloatList)
+            except:
+                imuOrientationQuaternion = [0.0, 0.0, 0.0, 1.0]
+    elif len(imuOrientationFloatList) == 4:
+        imuOrientationQuaternion = imuOrientationFloatList
+    else:
+        imuOrientationQuaternion = [0.0, 0.0, 0.0, 1.0]
 
     urdf_launch = IncludeLaunchDescription(
                             launch_description_sources.PythonLaunchDescriptionSource(
@@ -326,6 +351,10 @@ def generate_launch_description():
                         {'previewWidth':            previewWidth},
                         {'previewHeight':           previewHeight},
 
+                        {'imuOrientationQx':        imuOrientationQuaternion[0]},
+                        {'imuOrientationQy':        imuOrientationQuaternion[1]},
+                        {'imuOrientationQz':        imuOrientationQuaternion[2]},
+                        {'imuOrientationQw':        imuOrientationQuaternion[3]},
                         {'angularVelCovariance':    angularVelCovariance},
                         {'linearAccelCovariance':   linearAccelCovariance},
                         {'enableSpatialDetection':  enableSpatialDetection},
