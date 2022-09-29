@@ -38,10 +38,10 @@ class ImuConverter {
                  ImuSyncMethod syncMode = ImuSyncMethod::LINEAR_INTERPOLATE_ACCEL,
                  double linear_accel_cov = 0.0,
                  double angular_velocity_cov = 0.0,
-                 double imuOrientationQx = 0.0,
-                 double imuOrientationQy = 0.0,
-                 double imuOrientationQz = 0.0,
-                 double imuOrientationQw = 1.0);
+                 double imuQx = 0.0,
+                 double imuQy = 0.0,
+                 double imuQz = 0.0,
+                 double imuQw = 1.0);
 
     void toRosMsg(std::shared_ptr<dai::IMUData> inData, std::deque<ImuMsgs::Imu>& outImuMsg);
 
@@ -50,7 +50,7 @@ class ImuConverter {
     ImuMsgs::Imu CreateUnitMessage(dai::IMUReportAccelerometer accel, dai::IMUReportGyroscope gyro);
 
     uint32_t _sequenceNum;
-    double _imuOrientationQx, _imuOrientationQy, _imuOrientationQz, _imuOrientationQw, _linear_accel_cov, _angular_velocity_cov;
+    double _imuQx, _imuQy, _imuQz, _imuQw, _linear_accel_cov, _angular_velocity_cov;
     const std::string _frameName = "";
     ImuSyncMethod _syncMode;
     std::chrono::time_point<std::chrono::steady_clock> _steadyBaseTime;

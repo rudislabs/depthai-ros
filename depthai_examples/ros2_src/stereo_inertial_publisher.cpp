@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
     bool lrcheck, extended, subpixel, enableDepth, rectify, depth_aligned;
     bool enableSpatialDetection, enableDotProjector, enableFloodLight;
     bool usb2Mode, poeMode, syncNN;
-    double imuOrientationQx, imuOrientationQy, imuOrientationQz, imuOrientationQw, angularVelCovariance, linearAccelCovariance;
+    double imuQx, imuQy, imuQz, imuQw, angularVelCovariance, linearAccelCovariance;
     double dotProjectormA, floodLightmA;
     std::string nnName(BLOB_NAME);  // Set your blob name for the model here
 
@@ -302,15 +302,14 @@ int main(int argc, char** argv) {
     node->declare_parameter("rgbResolution", "1080p");
 
     node->declare_parameter("rgbScaleNumerator",   2);
-    node->declare_parameter("rgbScaleNumerator",   2);
     node->declare_parameter("rgbScaleDinominator", 3);
     node->declare_parameter("previewWidth",        416);
     node->declare_parameter("previewHeight",       416);
 
-    node->declare_parameter("imuOrientationQx", 0.0);
-    node->declare_parameter("imuOrientationQy", 0.0);
-    node->declare_parameter("imuOrientationQz", 0.0);
-    node->declare_parameter("imuOrientationQw", 1.0);
+    node->declare_parameter("imuQx", 0.0);
+    node->declare_parameter("imuQy", 0.0);
+    node->declare_parameter("imuQz", 0.0);
+    node->declare_parameter("imuQw", 1.0);
     node->declare_parameter("angularVelCovariance", 0.02);
     node->declare_parameter("linearAccelCovariance", 0.0);
     node->declare_parameter("enableSpatialDetection", true);
@@ -352,10 +351,10 @@ int main(int argc, char** argv) {
     node->get_parameter("previewWidth", previewWidth);
     node->get_parameter("previewHeight", previewHeight);
 
-    node->get_parameter("imuOrientationQx", imuOrientationQx);
-    node->get_parameter("imuOrientationQy", imuOrientationQy);
-    node->get_parameter("imuOrientationQz", imuOrientationQz);
-    node->get_parameter("imuOrientationQw", imuOrientationQw);
+    node->get_parameter("imuQx", imuQx);
+    node->get_parameter("imuQy", imuQy);
+    node->get_parameter("imuQz", imuQz);
+    node->get_parameter("imuQw", imuQw);
     node->get_parameter("angularVelCovariance", angularVelCovariance);
     node->get_parameter("linearAccelCovariance", linearAccelCovariance);
     node->get_parameter("enableSpatialDetection", enableSpatialDetection);
@@ -472,7 +471,7 @@ int main(int argc, char** argv) {
     const std::string leftPubName = rectify ? std::string("left/image_rect") : std::string("left/image_raw");
     const std::string rightPubName = rectify ? std::string("right/image_rect") : std::string("right/image_raw");
 
-    dai::rosBridge::ImuConverter imuConverter(tfPrefix + "_imu_frame", imuMode, linearAccelCovariance, angularVelCovariance, imuOrientationQx, imuOrientationQy, imuOrientationQz, imuOrientationQw);
+    dai::rosBridge::ImuConverter imuConverter(tfPrefix + "_imu_frame", imuMode, linearAccelCovariance, angularVelCovariance, imuQx, imuQy, imuQz, imuQw);
     dai::rosBridge::BridgePublisher<sensor_msgs::msg::Imu, dai::IMUData> imuPublish(
         imuQueue,
         node,

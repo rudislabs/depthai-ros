@@ -9,10 +9,6 @@ from launch.conditions import IfCondition, LaunchConfigurationEquals, LaunchConf
 import launch_ros.actions
 import launch_ros.descriptions
 
-def ConvertStrFloatList(str_list):
-    floatList=[float(fval) for fval in list(filter(None, str_list.replace('[','').replace(']', \
-        '').replace('(','').replace(')','').replace('[','').replace(' ',',').split(',')))]
-    return floatList
 
 def generate_launch_description():
     depthai_examples_path = get_package_share_directory('depthai_examples')
@@ -68,7 +64,11 @@ def generate_launch_description():
     previewWidth            = LaunchConfiguration('previewWidth',   default = 416)
     previewHeight           = LaunchConfiguration('previewHeight',  default = 416)
     
-    imuOrientation        = LaunchConfiguration('imuOrientation', default = '0.0, 0.0, 0.0, 1.0')
+    imuQx           = LaunchConfiguration('imuQx', default = 0.0)
+    imuQy           = LaunchConfiguration('imuQy', default = 0.0)
+    imuQz           = LaunchConfiguration('imuQz', default = 0.0)
+    imuQw           = LaunchConfiguration('imuQw', default = 1.0)
+
     angularVelCovariance  = LaunchConfiguration('angularVelCovariance', default = 0.0)
     linearAccelCovariance = LaunchConfiguration('linearAccelCovariance', default = 0.0)
 
@@ -250,10 +250,25 @@ def generate_launch_description():
         default_value=previewHeight,
         description='Set the height of the preview window used for the NN detection.')
 
-    declare_imuOrientation_cmd = DeclareLaunchArgument(
+    declare_imuQx_cmd = DeclareLaunchArgument(
         'angularVelCovariance',
-        default_value=imuOrientation,
-        description='Set the orientation of the IMU in RPY or XYZW.')
+        default_value=imuQx,
+        description='Set the orientation of the IMU Quaternion x.')
+
+    declare_imuQy_cmd = DeclareLaunchArgument(
+        'angularVelCovariance',
+        default_value=imuQy,
+        description='Set the orientation of the IMU Quaternion y.')
+
+    declare_imuQz_cmd = DeclareLaunchArgument(
+        'angularVelCovariance',
+        default_value=imuQz,
+        description='Set the orientation of the IMU Quaternion z.')
+
+    declare_imuQw_cmd = DeclareLaunchArgument(
+        'angularVelCovariance',
+        default_value=imuQw,
+        description='Set the orientation of the IMU Quaternion w.')
 
     declare_angularVelCovariance_cmd = DeclareLaunchArgument(
         'angularVelCovariance',
@@ -289,23 +304,6 @@ def generate_launch_description():
         'enableRviz',
         default_value=enableRviz,
         description='When True create a RVIZ window.')
-
-    imuOrientationFloatList=ConvertStrFloatList(imuOrientation)
-
-    if len(imuOrientationFloatList) == 3:
-        try:
-            from tf_transformations import quaternion_from_euler as QfE
-            imuOrientationQuaternion = QfE(imuOrientationFloatList)
-        except:
-            try:
-                from tf.transformations import quaternion_from_euler as QfE
-                imuOrientationQuaternion = QfE(imuOrientationFloatList)
-            except:
-                imuOrientationQuaternion = [0.0, 0.0, 0.0, 1.0]
-    elif len(imuOrientationFloatList) == 4:
-        imuOrientationQuaternion = imuOrientationFloatList
-    else:
-        imuOrientationQuaternion = [0.0, 0.0, 0.0, 1.0]
 
     urdf_launch = IncludeLaunchDescription(
                             launch_description_sources.PythonLaunchDescriptionSource(
@@ -351,10 +349,10 @@ def generate_launch_description():
                         {'previewWidth':            previewWidth},
                         {'previewHeight':           previewHeight},
 
-                        {'imuOrientationQx':        imuOrientationQuaternion[0]},
-                        {'imuOrientationQy':        imuOrientationQuaternion[1]},
-                        {'imuOrientationQz':        imuOrientationQuaternion[2]},
-                        {'imuOrientationQw':        imuOrientationQuaternion[3]},
+                        {'imuQx':                   imuQx},
+                        {'imuQy':                   imuQy},
+                        {'imuQz':                   imuQz},
+                        {'imuQw':                   imuQw},
                         {'angularVelCovariance':    angularVelCovariance},
                         {'linearAccelCovariance':   linearAccelCovariance},
                         {'enableSpatialDetection':  enableSpatialDetection},
@@ -470,6 +468,11 @@ def generate_launch_description():
     ld.add_action(declare_rgbScaleDinominator_cmd)
     ld.add_action(declare_previewWidth_cmd)
     ld.add_action(declare_previewHeight_cmd)
+
+    ld.add_action(declare_imuQx_cmd)
+    ld.add_action(declare_imuQy_cmd)
+    ld.add_action(declare_imuQz_cmd)
+    ld.add_action(declare_imuQw_cmd)
 
     ld.add_action(declare_angularVelCovariance_cmd)
     ld.add_action(declare_linearAccelCovariance_cmd)
